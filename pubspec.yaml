@@ -1,6 +1,6 @@
 name: call_notification_sdk
 description: Native incoming call notification handler for Flutter apps.
-version: 0.1.0
+version: 0.1.2
 homepage:
 
 environment:
