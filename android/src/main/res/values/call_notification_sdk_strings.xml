@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="call_notification_sdk_incoming_call">Incoming call</string>
+    <string name="call_notification_sdk_accept">Answer</string>
+    <string name="call_notification_sdk_decline">Decline</string>
+    <string name="call_notification_sdk_audio_call">Audio call</string>
+    <string name="call_notification_sdk_video_call">Video call</string>
+    <string name="call_notification_sdk_unknown_caller">Unknown caller</string>
+</resources>
+
