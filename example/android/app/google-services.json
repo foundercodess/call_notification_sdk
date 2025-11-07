@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "1086597732361",
+    "project_id": "healthease-cf69b",
+    "storage_bucket": "healthease-cf69b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086597732361:android:b825daaa57e7e28d6440d8",
+        "android_client_info": {
+          "package_name": "com.apponrent.health_ease_service"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcntcULnF72BBrKMU2lIrKaBt-gvS-yGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086597732361:android:d3f71f9eaf65a9586440d8",
+        "android_client_info": {
+          "package_name": "com.apponrents.healthease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcntcULnF72BBrKMU2lIrKaBt-gvS-yGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086597732361:android:9e90d13a0ec2c84c6440d8",
+        "android_client_info": {
+          "package_name": "com.example.call_notification_sdk_example"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcntcULnF72BBrKMU2lIrKaBt-gvS-yGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086597732361:android:1137a709c3eec2d26440d8",
+        "android_client_info": {
+          "package_name": "com.example.custom_video_calling"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcntcULnF72BBrKMU2lIrKaBt-gvS-yGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

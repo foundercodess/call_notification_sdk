@@ -17,6 +17,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import android.media.RingtoneManager
 import com.example.call_notification_sdk.R
 import com.example.call_notification_sdk.controller.CallNotificationController
 import com.example.call_notification_sdk.model.CallNotificationConfig
@@ -107,6 +108,8 @@ class CallNotificationService : Service() {
             pendingIntentFlags(),
         )
 
+        val soundUri = resolveSoundUri(config)
+
         val builder = NotificationCompat.Builder(this, config.androidChannelId)
             .setContentTitle(payload.callerName)
             .setContentText(getString(R.string.call_notification_sdk_incoming_call))
@@ -127,10 +130,7 @@ class CallNotificationService : Service() {
                 acceptIntent,
             )
 
-        if (config.ringtone != null) {
-            val soundUri = Uri.parse("android.resource://$packageName/${config.ringtone}")
-            builder.setSound(soundUri, AudioManager.STREAM_RING)
-        }
+        builder.setSound(soundUri, AudioManager.STREAM_RING)
 
         lastNotification = builder.build()
         return lastNotification!!
@@ -140,6 +140,12 @@ class CallNotificationService : Service() {
         val iconName = config.notificationIcon ?: DEFAULT_NOTIFICATION_ICON
         val resId = resources.getIdentifier(iconName, "drawable", packageName)
         return if (resId != 0) resId else R.drawable.call_notification_sdk_ic_notification
+    }
+
+    private fun resolveSoundUri(config: CallNotificationConfig): Uri {
+        return config.ringtone?.let {
+            Uri.parse("android.resource://$packageName/$it")
+        } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
     }
 
     private fun scheduleTimeout(config: CallNotificationConfig) {
@@ -206,16 +212,14 @@ class CallNotificationService : Service() {
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
-            if (config.ringtone != null) {
-                val soundUri = Uri.parse("android.resource://${context.packageName}/${config.ringtone}")
-                channel.setSound(
-                    soundUri,
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build(),
-                )
-            }
+            val soundUri = resolveChannelSoundUri(context, config)
+            channel.setSound(
+                soundUri,
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build(),
+            )
 
             manager.createNotificationChannel(channel)
         }
@@ -238,6 +242,15 @@ class CallNotificationService : Service() {
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
+        }
+
+        private fun resolveChannelSoundUri(
+            context: Context,
+            config: CallNotificationConfig,
+        ): Uri {
+            return config.ringtone?.let {
+                Uri.parse("android.resource://${context.packageName}/$it")
+            } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
         }
     }
 }
