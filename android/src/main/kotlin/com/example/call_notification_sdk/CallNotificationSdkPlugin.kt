@@ -1,6 +1,8 @@
 package com.example.call_notification_sdk
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.example.call_notification_sdk.controller.CallNotificationController
 import com.example.call_notification_sdk.model.CallEvent
@@ -29,6 +31,7 @@ class CallNotificationSdkPlugin :
     private lateinit var applicationContext: Context
 
     private var eventSink: EventChannel.EventSink? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = binding.applicationContext
@@ -133,6 +136,11 @@ class CallNotificationSdkPlugin :
     }
 
     override fun onEvent(event: CallEvent) {
-        eventSink?.success(event.toMap())
+        val sink = eventSink ?: return
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            sink.success(event.toMap())
+        } else {
+            mainHandler.post { sink.success(event.toMap()) }
+        }
     }
 }

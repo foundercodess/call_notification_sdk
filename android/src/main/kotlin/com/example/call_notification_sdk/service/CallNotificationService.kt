@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.net.Uri
@@ -63,7 +64,16 @@ class CallNotificationService : Service() {
 
         val config = lastConfig!!
 
-        startForeground(NOTIFICATION_ID, buildNotification(config, lastPayload!!))
+        val notification = buildNotification(config, lastPayload!!)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING,
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
         scheduleTimeout(config)
         launchFullScreen(lastPayload!!)
     }
