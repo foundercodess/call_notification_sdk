@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'calling_screen.dart';
 import 'firebase_options.dart';
 
 const CallNotificationConfig _callNotificationConfig = CallNotificationConfig(
@@ -68,15 +69,34 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription<RemoteMessage>? _onMessageSubscription;
   StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
   StreamSubscription<String>? _tokenRefreshSubscription;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  static const MethodChannel _channel = MethodChannel('call_notification_sdk/get_intent_extras');
+  
+  void _navigateToCallingScreen(CallNotificationPayload payload) {
+    if (mounted && _navigatorKey.currentState != null) {
+      // Always push (not replace) so home screen stays in stack
+      // This way when call ends, it can pop back to home screen
+      _navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => CallingScreen(payload: payload),
+          fullscreenDialog: true,
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
     CallNotificationSDK.instance.registerCallbacks(
-      onAccept: (payload) => setState(() {
-        _status = 'Accepted call ${payload.callId}';
-      }),
+      onAccept: (payload) {
+        setState(() {
+          _status = 'Accepted call ${payload.callId}';
+        });
+        // Navigate to calling screen - replace current screen if app is already running
+        _navigateToCallingScreen(payload);
+      },
       onDecline: (payload) => setState(() {
         _status = 'Declined call ${payload.callId}';
       }),
@@ -94,6 +114,58 @@ class _MyAppState extends State<MyApp> {
 
     unawaited(_initializeSdk(updateStatus: false));
     unawaited(_configureFirebaseMessaging());
+    // Check intent extras after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkIntentExtras();
+    });
+  }
+
+  Future<void> _checkIntentExtras({int retryCount = 0}) async {
+    try {
+      // Wait a bit for the method channel to be ready
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>('getIntentExtras');
+      if (result != null && result.isNotEmpty) {
+        // Check if we have call-related extras
+        final roomId = result['roomId']?.toString();
+        final callId = result['callId']?.toString();
+        
+        if (roomId != null || callId != null) {
+          final payload = CallNotificationPayload(
+            callId: callId ?? roomId ?? 'unknown',
+            roomId: roomId ?? callId ?? 'unknown',
+            callerId: result['callerId']?.toString() ?? 'unknown',
+            callerName: result['callerName']?.toString() ?? 'Unknown Caller',
+            receiverId: result['receiverId']?.toString() ?? 'unknown',
+            type: result['type']?.toString() ?? 'call_audio',
+            mediaType: result['mediaType']?.toString(),
+            avatarUrl: result['avatarUrl']?.toString(),
+          );
+          
+          // Wait a bit more to ensure navigator is ready
+          await Future.delayed(const Duration(milliseconds: 200));
+          
+          // Navigate to calling screen - always push (not replace) so home screen stays in stack
+          // This way when call ends, it can pop back to home screen
+          _navigateToCallingScreen(payload);
+          return;
+        }
+      }
+      
+      // Retry if we didn't find extras and haven't retried too many times
+      if (retryCount < 2 && mounted) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _checkIntentExtras(retryCount: retryCount + 1);
+      }
+    } catch (e) {
+      debugPrint('[Example] Error checking intent extras: $e');
+      // Retry on error if we haven't retried too many times
+      if (retryCount < 2 && mounted) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _checkIntentExtras(retryCount: retryCount + 1);
+      }
+    }
   }
 
   @override
@@ -268,6 +340,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Call Notification SDK Example'),
@@ -325,6 +398,7 @@ class _MyAppState extends State<MyApp> {
                   child: const Text('Simulate Incoming Call (local)'),
                 ),
               ),
+              SizedBox(height: 100,)
             ],
           ),
         ),

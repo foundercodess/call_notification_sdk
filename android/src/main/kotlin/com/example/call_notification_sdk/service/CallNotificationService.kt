@@ -63,6 +63,7 @@ class CallNotificationService : Service() {
         lastPayload = CallNotificationPayload.fromBundle(payloadBundle)
 
         val config = lastConfig!!
+        CallNotificationController.configure(config)
 
         val notification = buildNotification(config, lastPayload!!)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

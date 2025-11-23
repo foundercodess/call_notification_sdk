@@ -34,7 +34,10 @@ class IncomingCallActivity : AppCompatActivity() {
 
         acceptButton.setOnClickListener {
             CallNotificationController.onAccepted()
-            finish()
+            // Delay finish slightly to ensure the new activity launches first
+            acceptButton.postDelayed({
+                finish()
+            }, 100)
         }
 
         declineButton.setOnClickListener {
